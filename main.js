@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
+const morgan = require("morgan");
 const envFile =
     process.env.NODE_ENV === "production"
         ? ".env.production"
@@ -16,6 +17,7 @@ const routes = require("./src/routes");
 const errorHandler = require("./src/helpers/error-handler.js");
 
 const app = express();
+app.use(morgan('tiny'))
 app.use(
     cors({
         origin: ["http://localhost:3000", "https://locket-uploader.vercel.app"],
