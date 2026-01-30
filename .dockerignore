@@ -1,0 +1,36 @@
+# Dependencies
+node_modules
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Development files
+.env.development
+nodemon.json
+
+# Uploads (should use Azure Blob Storage in production)
+uploads/*
+!uploads/.gitkeep
+
+# Build artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Documentation
+*.md
+!README.md
+
+# GitHub
+.github
+
+# Lock files (using package-lock.json only)
+yarn.lock

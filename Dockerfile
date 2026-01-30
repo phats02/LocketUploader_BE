@@ -1,18 +1,48 @@
-# Sử dụng Node.js phiên bản 18 với Alpine Linux làm base image
-FROM node:18-alpine
+# Stage 1: Build stage
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Sao chép tệp package.json và package-lock.json (nếu có) vào thư mục làm việc
+# Install dependencies first (better layer caching)
 COPY package*.json ./
-COPY .env* ./
-COPY key.json ./
+RUN npm install --omit=dev
 
-# Sao chép tất cả các tệp trong thư mục src vào thư mục làm việc
-COPY src ./src
+# =============================================================================
+# Stage 2: Production stage
+# =============================================================================
+FROM node:18-alpine AS production
+
+# Install ffmpeg for video processing
+RUN apk add --no-cache ffmpeg
+
+WORKDIR /app
+
+# Copy node_modules from builder
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy application files
+COPY package*.json ./
 COPY main.js ./
+COPY src ./src
 
-RUN npm install
-EXPOSE 5001
+# Copy environment and credential files
+# Note: For production, consider using Azure Key Vault instead of bundling credentials
+COPY .env.production ./
+COPY key.json* ./
 
-CMD ["npm", "run", "deploy"]
+# Create uploads directory
+RUN mkdir -p uploads
+
+# Azure App Service uses PORT environment variable (default 8080)
+# Your app reads from process.env.PORT, so this works automatically
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Expose the port (Azure will set PORT=8080)
+EXPOSE 8080
+
+# Health check for Azure App Service
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/ || exit 1
+
+CMD ["node", "main.js"]
