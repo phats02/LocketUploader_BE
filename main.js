@@ -16,14 +16,14 @@ const { logInfo } = require("./src/services/logger.service.js");
 const routes = require("./src/routes");
 const errorHandler = require("./src/helpers/error-handler.js");
 
+console.log("📚 FRONTEND_URL: ", process.env.FRONTEND_URL)
+
 const app = express();
 app.use(morgan('tiny'))
 app.use(
     cors({
-        origin: ["http://localhost:3000", "https://locket-uploader.vercel.app"],
+        origin: [/^http:\/\/localhost:\d+$/, /^http:\/\/127.0.0.1:\d+$/, process.env.FRONTEND_URL],
         methods: ["GET", "POST"],
-
-        // Nhằm cho phép client gửi cookie lên server
         credentials: true,
     })
 );
