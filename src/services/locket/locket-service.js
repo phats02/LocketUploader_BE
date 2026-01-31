@@ -27,6 +27,8 @@ const login = async (email, password) => {
             body: requestData,
         });
 
+        console.log("Login res: ", response);
+
         if (!response.ok) {
             throw new Error(`Login failed: ${response.statusText}`);
         }
